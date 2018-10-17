@@ -1,0 +1,50 @@
+version: '2.1'
+services:
+  app:
+    build: .
+    volumes:
+      - .:/var/www
+    ports:
+      - "8800:80"
+    links:
+      - mysql
+      - redis
+      - maildev
+    environment:
+      - DB_HOST=mysql
+      - DB_USERNAME=proactys
+      - DB_DATABASE=proactys
+      - DB_PASSWORD=proactys
+      - APP_ENV=local
+      - APP_NAME=Proactys
+      - APP_URL=proactys.local
+      - REDIS_HOST=redis
+      - MAIL_HOST=maildev
+      - MAIL_PORT=25
+
+  mysql:
+    image: mariadb
+    volumes:
+      - ~/data/proactys/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=proactys
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=proactys
+      - MYSQL_USER=proactys
+      - MYSQL_PASSWORD=proactys
+    ports:
+      - "3396:3306"
+
+  maildev:
+    restart: always
+    image: djfarrelly/maildev
+    ports:
+      - "1091:80"
+
+  redis:
+    image: redis:4.0-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6337:6379"
+    volumes:
+      - ~/data/proactys/redis:/data
